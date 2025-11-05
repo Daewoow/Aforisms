@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Крылатые Фразы</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✨ Крылатые Фразы</h1>
+            <p>Введите текст, и мы найдем похожие известные цитаты и пословицы</p>
+            <div class="versions">
+                <span class="frontend-version">Фронтенд: v1.0.0</span>
+                <span class="backend-version">Бэкенд: <span id="backendVersion">-</span></span>
+            </div>
+        </header>
+
+        <main>
+            <div class="search-box">
+                <textarea id="textInput" placeholder="Введите текст здесь..." rows="3"></textarea>
+                <button id="searchBtn" class="btn">Найти похожие фразы</button>
+            </div>
+
+            <div class="backend-info">
+                <span>Обработано репликой: <span id="backendId">-</span></span>
+            </div>
+
+            <div id="results" class="results-container">
+                <div class="placeholder">
+                    <p>Результаты появятся здесь...</p>
+                </div>
+            </div>
+
+            <div class="add-phrase">
+                <h2>Добавить новую фразу</h2>
+                <input type="text" id="newPhrase" placeholder="Текст фразы">
+                <input type="text" id="phraseAuthor" placeholder="Автор/Источник">
+                <input type="text" id="phraseCategory" placeholder="Категория (любовь, мудрость, успех...)">
+                <button id="addPhraseBtn" class="btn">Добавить фразу</button>
+                <p id="addStatus"></p>
+            </div>
+        </main>
+
+        <footer>
+            <p>Приложение развернуто в Yandex Cloud с использованием serverless-технологий</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
