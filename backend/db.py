@@ -1,11 +1,8 @@
 import os
 import logging
-from typing import Type
-
 import ydb
 
 from backend.aforism_searcher import AforismSearcher
-from backend.searcher import Searcher
 from backend.word_searcher import WordSearcher
 
 logging.basicConfig(level=logging.INFO)
@@ -13,15 +10,14 @@ logger = logging.getLogger(__name__)
 
 
 class YDBClient:
-    def __init__(self, searcher: Type[Searcher]) -> None:
+    def __init__(self):
         self.endpoint: str = os.getenv('YDB_ENDPOINT')
         self.database: str = os.getenv('YDB_DATABASE')
         self.driver = None
         self.pool = None
-        self.vectorizer = None
-        self.phrases = []
-        self.phrase_vectors = None
-        self.searcher: Searcher = searcher(self)
+
+        self.aforism_searcher = AforismSearcher(self)
+        self.word_searcher = WordSearcher(self)
 
     async def connect(self) -> None:
         if not self.driver:
@@ -31,40 +27,70 @@ class YDBClient:
                 database=self.database,
                 credentials=ydb.credentials_from_env_variables()
             )
-            self.driver = ydb.Driver(driver_config)
-            await self.driver.wait(timeout=25)
-            self.pool = ydb.SessionPool(self.driver)
-            logger.info("Соединение с YDB установлено")
+            try:
+                self.driver = ydb.Driver(driver_config)
+                await self.driver.wait(timeout=30, fail_fast=True)
+                self.pool = ydb.SessionPool(self.driver, size=10)
+                logger.info("Соединение с YDB установлено")
+            except Exception as e:
+                logger.error(f"Не удалось подключиться к YDB: {e}", exc_info=True)
+                self.driver = None
 
     async def initialize_database(self) -> None:
         await self.connect()
+        if not self.pool:
+            logger.error("Инициализация БД невозможна, нет пула сессий.")
+            return
 
         async def create_tables(session) -> None:
-            create_query = """
-            CREATE TABLE aforisms (
-                id Utf8,
-                phrase Utf8,
-                author Utf8,
-                description Utf8,
-                PRIMARY KEY (id)
-            );
-            COMMIT;
-            CREATE TABLE words (
-                id Utf8,
-                word Utf8,
-                description Utf8,
-                PRIMARY KEY (id)
-            );
-            COMMIT;
-            """
-            await session.execute_scheme_query(create_query)
-            logger.info("Создали таблички")
+            try:
+                await session.execute_scheme_query("""
+                    CREATE TABLE aforisms (
+                        id Utf8,
+                        phrase Utf8,
+                        author Utf8,
+                        description Utf8,
+                        PRIMARY KEY (id)
+                    )
+                """)
+                logger.info("Таблица 'aforisms' создана.")
+            except ydb.SchemeError:
+                logger.info("Таблица 'aforisms' уже существует.")
 
-        await self.pool.retry_operation(create_tables)
-        await self.searcher.load_data_to_search()
+            try:
+                await session.execute_scheme_query("""
+                    CREATE TABLE words (
+                        id Utf8,
+                        word Utf8,
+                        description Utf8,
+                        PRIMARY KEY (id)
+                    )
+                """)
+                logger.info("Таблица 'words' создана.")
+            except ydb.SchemeError:
+                logger.info("Таблица 'words' уже существует.")
+
+        try:
+            await self.pool.retry_operation(create_tables)
+            logger.info("Проверка таблиц завершена.")
+        except Exception as e:
+            logger.error(f"Ошибка при создании таблиц: {e}", exc_info=True)
+
+        try:
+            await self.aforism_searcher.load_data_to_search()
+        except Exception as e:
+            logger.error(f"Ошибка при загрузке афоризмов: {e}", exc_info=True)
+
+        try:
+            await self.word_searcher.load_data_to_search()
+        except Exception as e:
+            logger.error(f"Ошибка при загрузке слов: {e}", exc_info=True)
 
     async def close(self):
         if self.pool:
             await self.pool.stop()
         if self.driver:
             self.driver.stop()
+
+
+ydb_client = YDBClient()
