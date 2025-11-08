@@ -11,7 +11,7 @@ REPLICA_ID = os.getenv('REPLICA_ID', 'replica-add-word')
 BACKEND_VERSION = 'v1.0.0-python'
 
 
-async def add_word_handler(event, context):
+def add_word_handler(event, context):
     """
     Функция для добавления нового слова
     POST /word
@@ -19,10 +19,6 @@ async def add_word_handler(event, context):
     """
     try:
         logger.info(f"Добавляем слово: {REPLICA_ID}")
-        if not hasattr(context, 'initialized'):
-            await ydb_client.initialize_database()
-            context.initialized = True
-            logger.info(f"БД инициализирована на реплике: {REPLICA_ID}")
 
         try:
             if isinstance(event['body'], str):
@@ -55,7 +51,7 @@ async def add_word_handler(event, context):
                     {'error': 'Invalid request format', 'backend_id': REPLICA_ID, 'backend_version': BACKEND_VERSION},
                     ensure_ascii=False)}
 
-        result = await ydb_client.word_searcher.add_data(
+        result = ydb_client.word_searcher.add_data(
             word=word,
             description=description
         )

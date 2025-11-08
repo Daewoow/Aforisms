@@ -9,21 +9,21 @@ class Searcher(ABC):
         self.ydb_client = ydb_client
 
     @abstractmethod
-    async def load_data_to_search(self):
+    def load_data_to_search(self):
         """
         Загружает данные из БД и создает векторные эмбеддинги
         """
         pass
 
     @abstractmethod
-    async def search_similar_data(self, query_text: str, limit: int):
+    def search_similar_data(self, query_text: str, limit: int):
         """
         Ищет похожие данные, используя векторы
         """
         pass
 
     @abstractmethod
-    async def add_data(self, **kwargs):
+    def add_data(self, **kwargs):
         """
         Добавляет новые данные в БД
         """

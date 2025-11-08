@@ -11,7 +11,7 @@ REPLICA_ID = os.getenv('REPLICA_ID', 'replica-1')
 BACKEND_VERSION = 'v1.0.0-python'
 
 
-async def search_phrase_handler(event, context):
+def search_phrase_handler(event, context):
     """
     Функция для поиска афоризмов
     GET /phrase
@@ -49,7 +49,7 @@ async def search_phrase_handler(event, context):
                     ensure_ascii=False)
             }
 
-        phrases = await ydb_client.aforism_searcher.search_similar_data(query_text, limit=5)
+        phrases = ydb_client.aforism_searcher.search_similar_data(query_text, limit=5)
 
         logger.info(f"Найдено {len(phrases)} похожих фраз: '{query_text}'")
         response = {

@@ -2,7 +2,7 @@ import json
 import logging
 import os
 from datetime import datetime
-from db import ydb_client  #
+from db import ydb_client
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -11,7 +11,7 @@ REPLICA_ID = os.getenv('REPLICA_ID', 'replica-add')
 BACKEND_VERSION = 'v1.0.0-python'
 
 
-async def add_phrase_handler(event, context):
+def add_phrase_handler(event, context):
     """
     Функция для добавления новой фразы
     POST /phrase
@@ -19,10 +19,6 @@ async def add_phrase_handler(event, context):
     """
     try:
         logger.info(f"Добавляем фраза: {REPLICA_ID}")
-        if not hasattr(context, 'initialized'):
-            await ydb_client.initialize_database()
-            context.initialized = True
-            logger.info(f"БД инициализирована на реплике: {REPLICA_ID}")
 
         try:
             if isinstance(event['body'], str):
@@ -55,7 +51,7 @@ async def add_phrase_handler(event, context):
                     ensure_ascii=False)
             }
 
-        result = await ydb_client.aforism_searcher.add_data(
+        result = ydb_client.aforism_searcher.add_data(
             phrase=phrase,
             author=author,
             description=description or None

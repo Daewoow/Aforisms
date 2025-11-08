@@ -11,7 +11,7 @@ REPLICA_ID = os.getenv('REPLICA_ID', 'replica-search-word')
 BACKEND_VERSION = 'v1.0.0-python'
 
 
-async def search_words_handler(event, context):
+def search_words_handler(event, context):
     try:
         logger.info(f"Ищем слова в реплике {REPLICA_ID}")
 
@@ -35,7 +35,7 @@ async def search_words_handler(event, context):
                                 }, 'body': json.dumps({'error': 'Invalid request format', 'backend_id': REPLICA_ID,
                                                        'backend_version': BACKEND_VERSION}, ensure_ascii=False)}
 
-        words = await ydb_client.word_searcher.search_similar_data(query_text, limit=5)
+        words = ydb_client.word_searcher.search_similar_data(query_text, limit=5)
         logger.info(f"Найдено {len(words)} похожих слов: '{query_text}'")
 
         response = {
