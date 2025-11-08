@@ -1,0 +1,71 @@
+openapi: 3.0.0
+info:
+  title: for-serverless-aforism
+  version: 1.1.0
+
+paths:
+  /:
+    get:
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: aforism-storage
+        object: index.html
+        presigned_redirect: false
+        service_account: ajehbnu4njv92544kqsa
+      operationId: static
+
+  /script.js:
+    get:
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: aforism-storage
+        object: script.js
+        presigned_redirect: false
+        service_account: ajehbnu4njv92544kqsa
+      operationId: getScriptJs
+
+  /phrase:
+    get:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4elcphnvh69elv5obkg
+      operationId: searchPhrase
+    post:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4elcphnvh69elv5obkg
+      operationId: addPhrase
+    options:
+      x-yc-apigateway-integration:
+        type: dummy
+        content:
+          '*': ""
+        http_code: 204
+        http_headers:
+          "Access-Control-Allow-Origin": "*"
+          "Access-Control-Allow-Methods": "POST, GET, OPTIONS"
+          "Access-Control-Allow-Headers": "Content-Type"
+      operationId: corsPhrase
+
+  /word:
+    get:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4elcphnvh69elv5obkg
+      operationId: searchWord
+    post:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4elcphnvh69elv5obkg
+      operationId: addWord
+    options:
+      x-yc-apigateway-integration:
+        type: dummy
+        content:
+          '*': ""
+        http_code: 204
+        http_headers:
+          "Access-Control-Allow-Origin": "*"
+          "Access-Control-Allow-Methods": "POST, GET, OPTIONS"
+          "Access-Control-Allow-Headers": "Content-Type"
+      operationId: corsWord
