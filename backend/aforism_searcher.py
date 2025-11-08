@@ -1,5 +1,7 @@
 import logging
-import ydb 
+import ydb
+from uuid import uuid4
+import json
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from huggingface_hub import InferenceClient 
@@ -106,35 +108,43 @@ class AforismSearcher(Searcher):
         results.sort(key=lambda x: x['similarity_score'], reverse=True)
         return results[:limit]
 
-    def add_data(self, phrase, author, description="Неизвестная фраза"):
+    def add_data(self, phrase, author="Народ", description="Неизвестная фраза"):
         self.ydb_client.connect()
-        from uuid import uuid4
-        phrase_id = str(uuid4())
+        if not self.ydb_client.pool:
+            print("Нет пула сессий YDB — не могу добавить данные.")
+            return None
+
+        new_id = str(uuid4())
+        q_id = json.dumps(new_id)
+        q_phrase = json.dumps(phrase)
+        q_author = json.dumps(author)
+        q_desc = json.dumps(description)
 
         def execute_query(session):
-            query = """
-            UPSERT INTO aforisms (id, phrase, author, description) 
-            VALUES ($id, $phrase, $author, $description) 
-            """
-
+            query = (
+                f"UPSERT INTO aforisms (id, phrase, author, description) "
+                f"VALUES ({q_id}, {q_phrase}, {q_author}, {q_desc})"
+            )
             session.transaction().execute(
                 query,
-                parameters={
-                    '$id': phrase_id,
-                    '$phrase': phrase,
-                    '$author': author,
-                    '$description': description or ''
-                },
-                commit_tx=True
+                commit_tx=True,
+                settings=ydb.BaseRequestSettings().with_timeout(10).with_operation_timeout(8)
             )
             return {
-                'id': phrase_id,
+                'id': new_id,
                 'phrase': phrase,
                 'author': author,
                 'description': description
             }
 
-        result = self.ydb_client.pool.retry_operation_sync(execute_query)
-        self.load_data_to_search()
-
-        return result
+        try:
+            result = self.ydb_client.pool.retry_operation_sync(execute_query)
+            print(f"Добавлена фраза: id={new_id}, phrase={phrase!r}")
+            try:
+                self.load_data_to_search()
+            except Exception as e:
+                print(f"Ошибка при перезагрузке данных после вставки: {e}")
+            return result
+        except Exception as e:
+            print(f"Ошибка при добавлении фразы в YDB: {e}")
+            return None

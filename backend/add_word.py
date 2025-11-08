@@ -28,6 +28,7 @@ def add_word_handler(event, context):
 
             word = body.get('word', '').strip()
             description = body.get('description', '').strip()
+            print(word, description)
 
             if not word or not description:
                 logger.warning("Пропущено слово или описание")

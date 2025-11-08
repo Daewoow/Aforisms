@@ -28,7 +28,8 @@ def add_phrase_handler(event, context):
 
             phrase = body.get('phrase', '').strip()
             author = body.get('author', '').strip()
-            description = body.get('category', '').strip()  #
+            description = body.get('description', '').strip()
+            print(phrase, author, description)
 
             if not phrase or not author:
                 return {
