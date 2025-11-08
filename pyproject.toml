@@ -7,6 +7,8 @@ requires-python = ">=3.12"
 dependencies = [
     "awscli>=1.42.66",
     "boto3>=1.40.66",
-    "nltk>=3.9.2",
+    "dotenv>=0.9.9",
+    "httpx>=0.28.1",
+    "sentence-transformers>=5.1.2",
     "ydb>=3.21.13",
 ]

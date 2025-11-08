@@ -20,11 +20,6 @@ async def search_phrase_handler(event, context):
     try:
         logger.info(f"Ищем в реплике {REPLICA_ID}")
 
-        if not hasattr(context, 'initialized'):
-            await ydb_client.initialize_database()
-            context.initialized = True
-            logger.info(f"БД и модели инициализированы на реплике {REPLICA_ID}")
-
         try:
             query_text = event.get('queryStringParameters', {}).get('text', '').strip()
 

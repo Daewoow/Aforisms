@@ -1,8 +1,9 @@
 import logging
 import ydb
 import numpy as np
-from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+from huggingface_hub import AsyncInferenceClient  
+import os
 from uuid import uuid4
 
 from backend.searcher import Searcher
@@ -13,8 +14,36 @@ logger = logging.getLogger('word_searcher')
 class WordSearcher(Searcher):
     def __init__(self, ydb_client):
         super().__init__(ydb_client)
-        self.model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
-        logger.info("Модель SentenceTransformer загружена для WordSearcher.")
+
+        self.api_token = os.environ.get("HF_TOKEN")
+        if not self.api_token:
+            logger.error("HF_TOKEN не найден в переменных окружения!")
+            raise ValueError("HF_TOKEN не найден в переменных окружения!")
+        
+        self.client = AsyncInferenceClient(
+            provider="hf-inference",  
+            token=self.api_token,
+            timeout=60.0  
+        )
+        self.model_id = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+
+    async def _get_embeddings_from_api(self, texts: list[str]):
+        """
+        Асинхронная функция для получения эмбеддингов через AsyncInferenceCliet.
+        """
+        try:
+            
+            embeddings = await self.client.feature_extraction(
+                text=texts,
+                model=self.model_id,
+                normalize=True,  
+            )
+            return np.array(embeddings)  
+        except Exception as e:  
+            logger.error(f"Ошибка при запросе к HF API: {e}")
+            if hasattr(e, 'response') and e.response.content:
+                logger.error(f"Ответ API: {e.response.content.decode()}")
+            return None
 
     async def load_data_to_search(self):
         await self.ydb_client.connect()
@@ -42,15 +71,22 @@ class WordSearcher(Searcher):
 
         if self.data:
             texts = [p['description'] for p in self.data]
-            self.vectors = self.model.encode(texts, show_progress_bar=False)
-            logger.info(f"Загружено и векторизовано {len(self.data)} слов.")
+            self.vectors = await self._get_embeddings_from_api(texts)
+            if self.vectors is not None:
+                logger.info(f"Загружено и векторизовано {len(self.data)} слов.")
+            else:
+                logger.warning("Не удалось получить векторы, поиск не будет работать.")
+                self.vectors = np.array([])
         else:
             self.vectors = np.array([])
             logger.warning("Слова не найдены в БД.")
 
-    def calculate_similarity(self, query_text, word_text, **kwargs):
+    async def calculate_similarity(self, query_text, word_text):
         logger.info("Calculating similarity (semantic) for word")
-        vectors = self.model.encode([query_text, word_text])
+        vectors_response = await self._get_embeddings_from_api([query_text, word_text])
+        if vectors_response is None:
+            return 0.0  
+        vectors = vectors_response
         sim = cosine_similarity([vectors[0]], [vectors[1]])
         return float(sim[0, 0])
 
@@ -61,7 +97,12 @@ class WordSearcher(Searcher):
         if not self.data or self.vectors.size == 0:
             return []
 
-        query_vector = self.model.encode([query_text])
+        query_vector_response = await self._get_embeddings_from_api([query_text])
+        if query_vector_response is None:
+            logger.warning("Не удалось векторизовать запрос.")
+            return []
+
+        query_vector = query_vector_response[0:1]
         similarities = cosine_similarity(query_vector, self.vectors)[0]
 
         results = []
@@ -105,3 +146,4 @@ class WordSearcher(Searcher):
         result = await self.ydb_client.pool.retry_operation(execute_query)
         await self.load_data_to_search()
         return result
+    

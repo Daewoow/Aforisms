@@ -3,48 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Крылатые Фразы</title>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <title>Поглаголим, чернь?</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>✨ Крылатые Фразы</h1>
-            <p>Введите текст, и мы найдем похожие известные цитаты и пословицы</p>
+            <h1>Крылатыя рѣчи и словеса любопытныя</h1>
+            <p>Вложи писаніе сюда, и диво сие обрѣтетъ подобныя вѣдомыя мудрыя рѣчения и словеса</p>
+            <p>Вѣдай, яко поиски могутъ заняти некое время ;-)</p>
             <div class="versions">
-                <span class="frontend-version">Фронтенд: v1.0.0</span>
-                <span class="backend-version">Бэкенд: <span id="backendVersion">-</span></span>
+                <span class="frontend-version">Преднее лицо аки "Фронтенд": v2.0.0</span>
+                <span class="backend-version">Заднее лицо аки "Бэкенд": <span id="backendVersion">-</span></span>
             </div>
         </header>
 
         <main>
             <div class="search-box">
-                <textarea id="textInput" placeholder="Введите текст здесь..." rows="3"></textarea>
-                <button id="searchBtn" class="btn">Найти похожие фразы</button>
+                <textarea id="textInput" placeholder="Впиши сюда словеса..." rows="3"></textarea>
+                <button id="searchBtn" class="btn">Искати подобныя</button>
             </div>
 
             <div class="backend-info">
-                <span>Обработано репликой: <span id="backendId">-</span></span>
+                <span>Сотворено подобной сущностью (репликой): <span id="backendId">-</span></span>
             </div>
 
             <div id="results" class="results-container">
                 <div class="placeholder">
-                    <p>Результаты появятся здесь...</p>
+                    <p>Плоды поисковъ явятся сюда...</p>
                 </div>
             </div>
 
-            <div class="add-phrase">
-                <h2>Добавить новую фразу</h2>
-                <label for="newPhrase"></label><input type="text" id="newPhrase" placeholder="Текст фразы">
-                <label for="phraseAuthor"></label><input type="text" id="phraseAuthor" placeholder="Автор/Источник">
-                <label for="phraseCategory"></label><input type="text" id="phraseCategory" placeholder="Категория (любовь, мудрость, успех...)">
-                <button id="addPhraseBtn" class="btn">Добавить фразу</button>
+            <div class="add-section">
+                <h2>Приложити новое</h2>
+
+                <select id="addTypeSelect">
+                    <option value="aforism" selected>Мудрость / Рѣчь</option>
+                    <option value="word">Слово</option>
+                </select>
+
+                <div id="aforismFields">
+                    <label for="newPhrase"></label><input type="text" id="newPhrase" placeholder="Рѣчь словесная">
+                    <label for="phraseAuthor"></label><input type="text" id="phraseAuthor" placeholder="Творецъ">
+                    <label for="phraseDescription"></label><input type="text" id="phraseDescription" placeholder="Объясненіе">
+                </div>
+
+                <div id="wordFields" style="display: none;">
+                    <label for="newWord"></label><input type="text" id="newWord" placeholder="Слово">
+                    <label for="wordDescription"></label><input type="text" id="wordDescription" placeholder="Объясненіе">
+                </div>
+
+                <button id="addBtn" class="btn">Приложити</button>
                 <p id="addStatus"></p>
             </div>
         </main>
 
         <footer>
-            <p>Приложение развернуто в Yandex Cloud с использованием serverless-технологий</p>
+            <p>Сіе чудо разверзнуто въ Облакѣ Яндекса (Yandex Cloud) со употребленіемъ безслуговыхъ (Serverless) технологій</p>
         </footer>
     </div>
 

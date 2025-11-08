@@ -1,0 +1,6 @@
+awscli>=1.42.66
+boto3>=1.40.66
+httpx>=0.28.1
+ydb>=3.21.13
+huggingface-hub>=0.36.0
+numpy>=2.3.4
