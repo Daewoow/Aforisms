@@ -1,17 +1,24 @@
-# index.py (Синхронный + Исправлен 404)
+import os
 
 from add_phrase import add_phrase_handler
 from add_word import add_word_handler
 from search_phrases import search_phrase_handler
 from search_words import search_words_handler
+from uuid import uuid4
+
+
+BACKEND_VERSION = os.environ.get('BACKEND_VERSION', "v.3.0.1")
+BACKEND_ID = str(uuid4())
 
 
 def response(status_code: int, headers: dict[str, str], is_encoded: bool, body: str) -> dict:
     return {
         'statusCode': status_code,
         'headers': headers,
-        'isBase66Encoded': is_encoded,
+        'isBase64Encoded': is_encoded,
         'body': body,
+        'BACKEND_ID': BACKEND_ID,
+        'BACKEND_VERSION': BACKEND_VERSION
     }
 
 

@@ -1,3 +1,19 @@
+const frontendVersionEl = document.querySelector('.frontend-version');
+
+async function loadFrontendVersion() {
+    try {
+        const resp = await fetch('/version.json', { cache: 'no-cache' });
+        if (!resp.ok)
+            return;
+        const j = await resp.json();
+        frontendVersionEl.textContent = `Фронтенд: ${j.frontend_version || '-'}`;
+    } catch (e) {
+        console.warn('Не удалось получить версию фронта', e);
+    }
+}
+
+loadFrontendVersion();
+
 document.addEventListener('DOMContentLoaded', function() {
     const textInput = document.getElementById('textInput');
     const searchBtn = document.getElementById('searchBtn');

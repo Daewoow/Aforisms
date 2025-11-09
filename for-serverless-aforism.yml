@@ -14,6 +14,16 @@ paths:
         service_account: ajehbnu4njv92544kqsa
       operationId: static
 
+  /version.json:
+    get:
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: aforism-storage
+        object: version.json
+        presigned_redirect: false
+        service_account: ajehbnu4njv92544kqsa
+      operationId: getVersionJson
+
   /script.js:
     get:
       x-yc-apigateway-integration:

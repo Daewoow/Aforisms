@@ -116,6 +116,9 @@ class WordSearcher(Searcher):
 
     def add_data(self, word, description="Интересное словечко"):
         self.ydb_client.connect()
+        if "--" in word or "--" in description:
+            return None
+
         if not self.ydb_client.pool:
             print("Нет пула сессий YDB — не могу добавить данные.")
             return None

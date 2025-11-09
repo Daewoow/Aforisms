@@ -110,6 +110,9 @@ class AforismSearcher(Searcher):
 
     def add_data(self, phrase, author="Народ", description="Неизвестная фраза"):
         self.ydb_client.connect()
+        if "--" in phrase or "--" in author or "--" in description:
+            return None
+
         if not self.ydb_client.pool:
             print("Нет пула сессий YDB — не могу добавить данные.")
             return None
