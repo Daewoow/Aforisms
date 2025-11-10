@@ -111,7 +111,7 @@ header p {
     background-color: #f4e8d3;
     border: 1px dashed #8b4513;
     border-radius: 5px;
-    min-height: 150px;
+    min-height: 15px;
 }
 
 .placeholder {
