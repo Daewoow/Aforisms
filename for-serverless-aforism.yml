@@ -34,6 +34,16 @@ paths:
         service_account: ajehbnu4njv92544kqsa
       operationId: getScriptJs
 
+  /style.css:
+    get:
+      x-yc-apugateway-integration:
+        type: object-storage
+        bucket: aforism-storage
+        object: script.js
+        presigned_redirect: false
+        service_account: ajehbnu4njv92544kqsa
+      operationId: getStyleCss
+
   /phrase:
     get:
       x-yc-apigateway-integration:
